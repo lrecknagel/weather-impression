@@ -152,7 +152,7 @@ class weatherInfomation(object):
             else:
                 self.forecast_api_uri = self.forecast_api_uri + "&units=metric"
             self.loadWeatherData()
-            self.language = self.config.get('openweathermap', 'LANG')
+            self.lang = self.config.get('openweathermap', 'LANG')
         except:
             self.one_time_message = "Configuration file is not found or settings are wrong.\nplease check the file : " + project_root + "/config.txt\n\nAlso check your internet connection."
             return
