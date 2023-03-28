@@ -16,12 +16,12 @@ from PIL import Image, ImageDraw, ImageFont, ImageFilter
 from inky.inky_uc8159 import Inky, BLACK, WHITE, GREEN, RED, YELLOW, ORANGE, BLUE, DESATURATED_PALETTE as color_palette
 
 saturation = 0.5
-canvasSize = (600, 448)
+canvasSize = (800, 480)
 
 tmpfs_path = "/dev/shm/"
 
 # font file path(Adjust or change whatever you want)
-os.chdir('/home/pi/weather-impression')
+os.chdir('/home/pi/inky/weather-impression')
 project_root = os.getcwd()
 
 unit_imperial = "imperial"
@@ -497,7 +497,7 @@ def annot_max(x,y, ax=None):
     kw = dict(xycoords='data',textcoords="axes fraction",
               arrowprops=arrowprops, bbox=bbox_props, ha="right", va="top")
 
-    fpath = "/home/pi/weather-impression/fonts/Roboto-Black.ttf"
+    fpath = "/home/pi/inky/weather-impression/fonts/Roboto-Black.ttf"
     prop = fm.FontProperties(fname=fpath)
     ax.annotate(text, xy=(xmax, ymax), xytext=(0.93,1.56), fontproperties=prop, **kw)
 
@@ -522,10 +522,7 @@ def update():
     setUpdateStatus(gpio_pin, True)
     wi = weatherInfomation()
     cv = Image.new("RGB", canvasSize, getDisplayColor(WHITE) )
-    #cv = cv.rotate(90, expand=True)
     drawWeather(wi, cv)
-    # cv.save("test.png")
-    #cv = cv.rotate(-90, expand=True)
     inky = Inky()
     inky.set_image(cv, saturation=saturation)
     inky.show()

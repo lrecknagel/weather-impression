@@ -39,7 +39,7 @@ print(
 
 
 # config file should be the same folder.
-os.chdir('/home/pi/weather-impression')
+os.chdir('/home/pi/inky/weather-impression')
 project_root = os.getcwd()
 configFilePath = project_root + '/config.txt'
 
