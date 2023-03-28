@@ -94,35 +94,45 @@ def getTranslation(lang, value):
     if (lang == 'EN'):
         return value
     else:
-        translations = {
-            'January': 'Januar',
-            'February': 'Februar',
-            'March': 'März',
-            'April': 'April',
-            'May': 'Mai',
-            'June': 'Juni',
-            'July': 'Juli',
-            'August': 'August',
-            'September': 'September',
-            'October': 'Oktober',
-            'November': 'November',
-            'December': 'Dezember',
-            'Temperature': 'Temperatur',
-            'Feels like': 'Gefühlt',
-            'Pressure': 'Druck',
-            'AM': '00:00',
-            'PM': '12:00',
-            'clear sky': 'klare Sicht',
-            'few clouds': 'Wolkig',
-            'scattered clouds': 'Bewölkt',
-            'broken clouds': 'Leicht Bewölkt',
-            'shower rain': 'Starker Regen',
-            'rain': 'Regen',
-            'thunderstorm': 'Gewitter',
-            'snow': 'Schnee',
-            'fog': 'Nebel'
-        }
-        return translations[value]
+        try:
+            translations = {
+                'January': 'Januar',
+                'February': 'Februar',
+                'March': 'März',
+                'April': 'April',
+                'May': 'Mai',
+                'June': 'Juni',
+                'July': 'Juli',
+                'August': 'August',
+                'September': 'September',
+                'October': 'Oktober',
+                'November': 'November',
+                'December': 'Dezember',
+                'Mon': 'Mo',
+                'Tue': 'Di',
+                'Wed': 'Mi',
+                'Thu': 'Do',
+                'Fri': 'Fr',
+                'Sat': 'Sa',
+                'Sun': 'So',
+                'Temperature': 'Temperatur',
+                'Feels like': 'Gefühlt',
+                'Pressure': 'Druck',
+                'AM': '00:00',
+                'PM': '12:00',
+                'clear sky': 'klare Sicht',
+                'few clouds': 'Wolkig',
+                'scattered clouds': 'Bewölkt',
+                'broken clouds': 'Leicht Bewölkt',
+                'shower rain': 'Starker Regen',
+                'rain': 'Regen',
+                'thunderstorm': 'Gewitter',
+                'snow': 'Schnee',
+                'fog': 'Nebel'
+            }
+            return translations[value]
+        except KeyError:
+            return value
 
 #empty structure
 class forecastInfo:
@@ -235,12 +245,14 @@ def drawWeather(wi, cv):
     pressure = wi.weatherInfo[u'current'][u'pressure']
     epoch = int(wi.weatherInfo[u'current'][u'dt'])
     #snow = wi.weatherInfo[u'current'][u'snow']
-    dateString = time.strftime("%B %-d", time.localtime(epoch))
+    # dateString = time.strftime("%B %-d", time.localtime(epoch))
+    monthString = time.strftime("%B", time.localtime(epoch))
+    dayString = time.strftime("%-d", time.localtime(epoch))
     weekDayString = time.strftime("%a", time.localtime(epoch))
     weekDayNumber = time.strftime("%w", time.localtime(epoch))
 
     # date 
-    draw.text((15 , 5), getTranslation(wi.lang, dateString), getDisplayColor(BLACK), font=getFont(fonts.normal, fontsize=64))
+    draw.text((15 , 5), getTranslation(wi.lang, monthString) + dayString, getDisplayColor(BLACK), font=getFont(fonts.normal, fontsize=64))
     draw.text((width - 8 , 5), getTranslation(wi.lang, weekDayString), getDisplayColor(BLACK), anchor="ra", font=getFont(fonts.normal, fontsize=64))
 
     offsetX = 10
