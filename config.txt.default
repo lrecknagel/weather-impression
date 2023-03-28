@@ -24,3 +24,6 @@ TEMP_UNIT=imperial
 cold_temp=41
 # red
 hot_temp=88
+
+# Lang EN, DE
+LANG=DE

@@ -14,6 +14,7 @@ from enum import Enum
 
 from PIL import Image, ImageDraw, ImageFont, ImageFilter
 from inky.inky_uc8159 import Inky, BLACK, WHITE, GREEN, RED, YELLOW, ORANGE, BLUE, DESATURATED_PALETTE as color_palette
+from inky.auto import auto
 
 saturation = 0.5
 canvasSize = (800, 480)
@@ -89,6 +90,40 @@ iconMap = {
     'sunset':u''
 }
 
+def getTranslation(lang, value):
+    if (lang == 'EN'):
+        return value
+    else:
+        translations = {
+            'January': 'Januar',
+            'February': 'Februar',
+            'March': 'März',
+            'April': 'April',
+            'May': 'Mai',
+            'June': 'Juni',
+            'July': 'Juli',
+            'August': 'August',
+            'September': 'September',
+            'October': 'Oktober',
+            'November': 'November',
+            'December': 'Dezember',
+            'Temperature': 'Temperatur',
+            'Feels like': 'Gefühlt',
+            'Pressure': 'Druck',
+            'AM': '00:00',
+            'PM': '12:00',
+            'clear sky': 'klare Sicht',
+            'few clouds': 'Wolkig',
+            'scattered clouds': 'Bewölkt',
+            'broken clouds': 'Leicht Bewölkt',
+            'shower rain': 'Starker Regen',
+            'rain': 'Regen',
+            'thunderstorm': 'Gewitter',
+            'snow': 'Schnee',
+            'fog': 'Nebel'
+        }
+        return translations[value]
+
 #empty structure
 class forecastInfo:
     pass
@@ -117,6 +152,7 @@ class weatherInfomation(object):
             else:
                 self.forecast_api_uri = self.forecast_api_uri + "&units=metric"
             self.loadWeatherData()
+            self.language = self.config.get('openweathermap', 'LANG')
         except:
             self.one_time_message = "Configuration file is not found or settings are wrong.\nplease check the file : " + project_root + "/config.txt\n\nAlso check your internet connection."
             return
@@ -204,8 +240,8 @@ def drawWeather(wi, cv):
     weekDayNumber = time.strftime("%w", time.localtime(epoch))
 
     # date 
-    draw.text((15 , 5), dateString, getDisplayColor(BLACK),font=getFont(fonts.normal, fontsize=64))
-    draw.text((width - 8 , 5), weekDayString, getDisplayColor(BLACK), anchor="ra", font =getFont(fonts.normal, fontsize=64))
+    draw.text((15 , 5), getTranslation(wi.lang, dateString), getDisplayColor(BLACK), font=getFont(fonts.normal, fontsize=64))
+    draw.text((width - 8 , 5), getTranslation(wi.lang, weekDayString), getDisplayColor(BLACK), anchor="ra", font=getFont(fonts.normal, fontsize=64))
 
     offsetX = 10
     offsetY = 40
@@ -217,7 +253,7 @@ def drawWeather(wi, cv):
         # when the temp string is a bit short.
         tempOffset = 45
 
-    draw.text((5 + offsetX , 35 + offsetY), "Temperature", getDisplayColor(BLACK),font=getFont(fonts.light,fontsize=24))
+    draw.text((5 + offsetX , 35 + offsetY), getTranslation(wi.lang, "Temperature"), getDisplayColor(BLACK),font=getFont(fonts.light,fontsize=24))
     draw.text((tempOffset + offsetX, 50 + offsetY), getTempretureString(temp_cur), getFontColor(temp_cur, wi),font =getFont(fonts.normal, fontsize=120))
     draw.text((temperatureTextSize[0] + 10 + tempOffset + offsetX, 85 + offsetY), getUnitSign(wi.unit), getFontColor(temp_cur, wi), anchor="la", font =getFont(fonts.icon, fontsize=80))
     # humidity
@@ -226,7 +262,7 @@ def drawWeather(wi, cv):
     # draw current weather icon
     draw.text((440 + offsetX, 40 + offsetY), iconMap[icon], getDisplayColor(colorMap[icon]), anchor="ma",font=getFont(fonts.icon, fontsize=160))
 
-    draw.text((width - 8, 35 + offsetY), description, getDisplayColor(BLACK), anchor="ra", font =getFont(fonts.light,fontsize=24))
+    draw.text((width - 8, 35 + offsetY), getTranslation(wi.lang, description), getDisplayColor(BLACK), anchor="ra", font =getFont(fonts.light,fontsize=24))
 
     offsetY = 210
     
@@ -265,8 +301,8 @@ def drawWeather(wi, cv):
         from matplotlib import font_manager as fm, rcParams
         import numpy as np
         forecastRange = 47
-        graph_height = 1.1
-        graph_width = 8.4
+        graph_height = 1.3
+        graph_width = 10.4
         xarray = []
         tempArray = []
         feelsArray = []
@@ -335,13 +371,13 @@ def drawWeather(wi, cv):
 
         # draw label
         draw.rectangle((5, 430, 20, 446), fill=getDisplayColor(RED))
-        draw.text((15 + offsetX, 428), "Pressure", getDisplayColor(BLACK),font=getFont(fonts.normal, fontsize=16))
+        draw.text((15 + offsetX, 428), getTranslation(wi.lang, "Pressure"), getDisplayColor(BLACK),font=getFont(fonts.normal, fontsize=16))
 
         draw.rectangle((135, 430, 150, 446), fill=getDisplayColor(BLUE))
-        draw.text((145 + offsetX, 428), "Temp", getDisplayColor(BLACK),font=getFont(fonts.normal, fontsize=16))
+        draw.text((145 + offsetX, 428), getTranslation(wi.lang, "Temp"), getDisplayColor(BLACK),font=getFont(fonts.normal, fontsize=16))
 
         draw.rectangle((265, 430, 280, 446), fill=getDisplayColor(GREEN))
-        draw.text((275 + offsetX, 428), "Feels like", getDisplayColor(BLACK),font=getFont(fonts.normal, fontsize=16))
+        draw.text((275 + offsetX, 428), getTranslation(wi.lang, "Feels like"), getDisplayColor(BLACK),font=getFont(fonts.normal, fontsize=16))
         return
 
     # Sunrise / Sunset mode
@@ -523,7 +559,8 @@ def update():
     wi = weatherInfomation()
     cv = Image.new("RGB", canvasSize, getDisplayColor(WHITE) )
     drawWeather(wi, cv)
-    inky = Inky()
+    # inky = Inky()
+    inky = auto()
     inky.set_image(cv, saturation=saturation)
     inky.show()
     setUpdateStatus(gpio_pin, False)
