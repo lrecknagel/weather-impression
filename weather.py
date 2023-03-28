@@ -252,7 +252,7 @@ def drawWeather(wi, cv):
     weekDayNumber = time.strftime("%w", time.localtime(epoch))
 
     # date 
-    draw.text((15 , 5), getTranslation(wi.lang, monthString) + dayString, getDisplayColor(BLACK), font=getFont(fonts.normal, fontsize=64))
+    draw.text((15 , 5), getTranslation(wi.lang, monthString) + " " + dayString, getDisplayColor(BLACK), font=getFont(fonts.normal, fontsize=64))
     draw.text((width - 8 , 5), getTranslation(wi.lang, weekDayString), getDisplayColor(BLACK), anchor="ra", font=getFont(fonts.normal, fontsize=64))
 
     offsetX = 10
@@ -296,13 +296,13 @@ def drawWeather(wi, cv):
         draw.text((5 + offsetX, 270), desc, getDisplayColor(RED),anchor="la", font =getFont(fonts.normal, fontsize=14))
         return
     # feels like
-    draw.text((5 + offsetX , 175 + 40), "Feels like", getDisplayColor(BLACK),font =getFont(fonts.light,fontsize=24))
+    draw.text((5 + offsetX , 175 + 40), getTranslation(wi.lang, "Feels like"), getDisplayColor(BLACK),font =getFont(fonts.light,fontsize=24))
     draw.text((10 + offsetX, 200 + 40), getTempretureString(temp_cur_feels),getFontColor(temp_cur_feels, wi),font =getFont(fonts.normal, fontsize=50))
     feelslikeTextSize = draw.textsize(getTempretureString(temp_cur_feels), font =getFont(fonts.normal, fontsize=50))
     draw.text((feelslikeTextSize[0] + 20 + offsetX, 200 + 40), getUnitSign(wi.unit), getFontColor(temp_cur_feels, wi), anchor="la", font=getFont(fonts.icon,fontsize=50))
 
     # Pressure
-    draw.text((feelslikeTextSize[0] + 85 + offsetX , 175 + 40), "Pressure", getDisplayColor(BLACK),font =getFont(fonts.light,fontsize=24))
+    draw.text((feelslikeTextSize[0] + 85 + offsetX , 175 + 40), getTranslation(wi.lang, "Pressure"), getDisplayColor(BLACK),font =getFont(fonts.light,fontsize=24))
     draw.text((feelslikeTextSize[0] + 90 + offsetX, 200 + 40), "%d" % pressure, getDisplayColor(BLACK),font =getFont(fonts.normal, fontsize=50))
     pressureTextSize = draw.textsize("%d" % pressure, font =getFont(fonts.normal, fontsize=50))
     draw.text((feelslikeTextSize[0] + pressureTextSize[0] + 95 + offsetX, 224 + 40), "hPa", getDisplayColor(BLACK),font=getFont(fonts.normal, fontsize=22))
@@ -313,8 +313,8 @@ def drawWeather(wi, cv):
         from matplotlib import font_manager as fm, rcParams
         import numpy as np
         forecastRange = 47
-        graph_height = 1.3
-        graph_width = 10.4
+        graph_height = 1.5
+        graph_width = 10.9
         xarray = []
         tempArray = []
         feelsArray = []
