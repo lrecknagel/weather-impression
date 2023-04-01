@@ -276,14 +276,14 @@ def drawWeather(wi, cv):
 
     # Draw temperature string
     tempOffset = 20 
-    temperatureTextSize = draw.textsize(getTempretureString(temp_cur), font =getFont(fonts.normal, fontsize=120))
-    if(temperatureTextSize[0] < 71):
+    temperatureTextWidth = draw.textlength(getTempretureString(temp_cur), font =getFont(fonts.normal, fontsize=120))
+    if(temperatureTextWidth < 71):
         # when the temp string is a bit short.
         tempOffset = 45
 
     draw.text((5 + offsetX , 35 + offsetY), getTranslation(wi.lang, "Temperature"), getDisplayColor(BLACK),font=getFont(fonts.light,fontsize=24))
     draw.text((tempOffset + offsetX, 50 + offsetY), getTempretureString(temp_cur), getFontColor(temp_cur, wi),font =getFont(fonts.normal, fontsize=120))
-    draw.text((temperatureTextSize[0] + 10 + tempOffset + offsetX, 85 + offsetY), getUnitSign(wi.unit), getFontColor(temp_cur, wi), anchor="la", font =getFont(fonts.icon, fontsize=80))
+    draw.text((temperatureTextWidth + 10 + tempOffset + offsetX, 85 + offsetY), getUnitSign(wi.unit), getFontColor(temp_cur, wi), anchor="la", font =getFont(fonts.icon, fontsize=80))
     # humidity
     # draw.text((width - 8, 270 + offsetY), str(humidity) + "%", getDisplayColor(BLACK), anchor="rs",font =getFont(fonts.light,fontsize=24))
 
@@ -314,14 +314,14 @@ def drawWeather(wi, cv):
     # feels like
     draw.text((5 + offsetX , 175 + 40), getTranslation(wi.lang, "Feels like"), getDisplayColor(BLACK),font =getFont(fonts.light,fontsize=24))
     draw.text((10 + offsetX, 200 + 40), getTempretureString(temp_cur_feels),getFontColor(temp_cur_feels, wi),font =getFont(fonts.normal, fontsize=50))
-    feelslikeTextSize = draw.textsize(getTempretureString(temp_cur_feels), font =getFont(fonts.normal, fontsize=50))
-    draw.text((feelslikeTextSize[0] + 20 + offsetX, 200 + 40), getUnitSign(wi.unit), getFontColor(temp_cur_feels, wi), anchor="la", font=getFont(fonts.icon,fontsize=50))
+    feelslikeTextWidth = draw.textlength(getTempretureString(temp_cur_feels), font =getFont(fonts.normal, fontsize=50))
+    draw.text((feelslikeTextWidth + 20 + offsetX, 200 + 40), getUnitSign(wi.unit), getFontColor(temp_cur_feels, wi), anchor="la", font=getFont(fonts.icon,fontsize=50))
 
     # Pressure
-    draw.text((feelslikeTextSize[0] + 85 + offsetX , 175 + 40), getTranslation(wi.lang, "Pressure"), getDisplayColor(BLACK),font =getFont(fonts.light,fontsize=24))
-    draw.text((feelslikeTextSize[0] + 90 + offsetX, 200 + 40), "%d" % pressure, getDisplayColor(BLACK),font =getFont(fonts.normal, fontsize=50))
-    pressureTextSize = draw.textsize("%d" % pressure, font =getFont(fonts.normal, fontsize=50))
-    draw.text((feelslikeTextSize[0] + pressureTextSize[0] + 95 + offsetX, 224 + 40), "hPa", getDisplayColor(BLACK),font=getFont(fonts.normal, fontsize=22))
+    draw.text((feelslikeTextWidth + 85 + offsetX , 175 + 40), getTranslation(wi.lang, "Pressure"), getDisplayColor(BLACK),font =getFont(fonts.light,fontsize=24))
+    draw.text((feelslikeTextWidth + 90 + offsetX, 200 + 40), "%d" % pressure, getDisplayColor(BLACK),font =getFont(fonts.normal, fontsize=50))
+    pressureTextWidth = draw.textlength("%d" % pressure, font =getFont(fonts.normal, fontsize=50))
+    draw.text((feelslikeTextWidth + pressureTextWidth + 95 + offsetX, 224 + 40), "hPa", getDisplayColor(BLACK),font=getFont(fonts.normal, fontsize=22))
     
     # Graph mode
     if wi.mode == '2':
