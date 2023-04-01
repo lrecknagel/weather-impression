@@ -17,7 +17,6 @@ from inky.inky_uc8159 import Inky, BLACK, WHITE, GREEN, RED, YELLOW, ORANGE, BLU
 from inky.auto import auto
 
 saturation = 0.5
-canvasSize = (800, 480)
 
 tmpfs_path = "/dev/shm/"
 
@@ -134,6 +133,22 @@ def getTranslation(lang, value):
         except KeyError:
             return value
 
+def getCanvasSize(inky_type):
+    if (inky_type == '57'):
+        return (600, 448)
+    elif (inky_type == '73'):
+        return (800, 480)
+    else:
+      raise TypeError('Invalid Inky Type')
+    
+def getGraphSize(inky_type):
+    if (inky_type == '57'):
+        return (1.1, 8.4)
+    elif (inky_type == '73'):
+        return (1.6, 11.2)
+    else:
+      raise TypeError('Invalid Inky Type')
+
 #empty structure
 class forecastInfo:
     pass
@@ -163,6 +178,7 @@ class weatherInfomation(object):
                 self.forecast_api_uri = self.forecast_api_uri + "&units=metric"
             self.loadWeatherData()
             self.lang = self.config.get('openweathermap', 'LANG')
+            self.inky_size = self.config.get('openweathermap', 'INKY_SIZE')
         except:
             self.one_time_message = "Configuration file is not found or settings are wrong.\nplease check the file : " + project_root + "/config.txt\n\nAlso check your internet connection."
             return
@@ -255,8 +271,8 @@ def drawWeather(wi, cv):
     draw.text((15 , 5), getTranslation(wi.lang, monthString) + " " + dayString, getDisplayColor(BLACK), font=getFont(fonts.normal, fontsize=64))
     draw.text((width - 8 , 5), getTranslation(wi.lang, weekDayString), getDisplayColor(BLACK), anchor="ra", font=getFont(fonts.normal, fontsize=64))
 
-    offsetX = 10
-    offsetY = 40
+    offsetX = 20
+    offsetY = 50
 
     # Draw temperature string
     tempOffset = 20 
@@ -313,8 +329,9 @@ def drawWeather(wi, cv):
         from matplotlib import font_manager as fm, rcParams
         import numpy as np
         forecastRange = 47
-        graph_height = 1.5
-        graph_width = 10.9
+        graph_size = getGraphSize(wi.inky_type)
+        graph_height = graph_size[0]
+        graph_width = graph_size[1]
         xarray = []
         tempArray = []
         feelsArray = []
@@ -569,7 +586,7 @@ def update():
     gpio_pin = initGPIO()
     setUpdateStatus(gpio_pin, True)
     wi = weatherInfomation()
-    cv = Image.new("RGB", canvasSize, getDisplayColor(WHITE) )
+    cv = Image.new("RGB", getCanvasSize(wi.inky_size), getDisplayColor(WHITE))
     drawWeather(wi, cv)
     # inky = Inky()
     inky = auto()

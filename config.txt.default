@@ -27,3 +27,6 @@ hot_temp=88
 
 # Lang EN, DE
 LANG=DE
+
+# Inky size 57, 73
+INKY_SIZE=73
