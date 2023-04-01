@@ -325,7 +325,7 @@ def drawWeather(wi, cv):
         from matplotlib import font_manager as fm
         import numpy as np
         forecastRange = 47
-        graph_size = getGraphSize(wi.inky_type)
+        graph_size = getGraphSize(wi.inky_size)
         graph_height = graph_size[0]
         graph_width = graph_size[1]
         xarray = []
