@@ -141,7 +141,7 @@ def getGraphSize(inky_type):
     if (inky_type == '57'):
         return (1.1, 8.4)
     elif (inky_type == '73'):
-        return (1.6, 11.2)
+        return (1.6, 11.0)
     else:
       raise TypeError('Invalid Inky Type')
 
@@ -267,8 +267,8 @@ def drawWeather(wi, cv):
     draw.text((15 , 5), getTranslation(wi.lang, monthString) + " " + dayString, getDisplayColor(BLACK), font=getFont(fonts.normal, fontsize=64))
     draw.text((width - 8 , 5), getTranslation(wi.lang, weekDayString), getDisplayColor(BLACK), anchor="ra", font=getFont(fonts.normal, fontsize=64))
 
-    offsetX = 20
-    offsetY = 50
+    offsetX = 10
+    offsetY = 40
 
     # Draw temperature string
     tempOffset = 20 
@@ -388,20 +388,20 @@ def drawWeather(wi, cv):
             if h == '0' or h == '12':
                 plt.axvline(x=xarray[idx], color='black', linestyle=':')
                 posY = np.array(tempArray).max() + 1
-                plt.text(xarray[idx-1], posY, time.strftime('%p', time.localtime(xarray[idx])))
+                plt.text(xarray[idx-1], posY, getTranslation(wi.lang, time.strftime('%p', time.localtime(xarray[idx]))))
         plt.axis('off')
         plt.savefig(tmpfs_path+'temp.png', bbox_inches='tight',  transparent=True)
         tempGraphImage = Image.open(tmpfs_path+"temp.png")
         cv.paste(tempGraphImage, (-35, 300), tempGraphImage)
 
         # draw label
-        draw.rectangle((5, 460, 20, 476), fill=getDisplayColor(RED))
+        draw.rectangle((10, 460, 20, 476), fill=getDisplayColor(RED))
         draw.text((15 + offsetX, 458), getTranslation(wi.lang, "Pressure"), getDisplayColor(BLACK),font=getFont(fonts.normal, fontsize=16))
 
-        draw.rectangle((135, 460, 150, 476), fill=getDisplayColor(BLUE))
+        draw.rectangle((145, 460, 150, 476), fill=getDisplayColor(BLUE))
         draw.text((145 + offsetX, 458), getTranslation(wi.lang, "Temp"), getDisplayColor(BLACK),font=getFont(fonts.normal, fontsize=16))
 
-        draw.rectangle((265, 460, 280, 476), fill=getDisplayColor(GREEN))
+        draw.rectangle((275, 460, 280, 476), fill=getDisplayColor(GREEN))
         draw.text((275 + offsetX, 458), getTranslation(wi.lang, "Feels like"), getDisplayColor(BLACK),font=getFont(fonts.normal, fontsize=16))
         return
 
