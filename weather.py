@@ -395,7 +395,7 @@ def drawWeather(wi, cv):
         cv.paste(tempGraphImage, (-35, 300), tempGraphImage)
 
         # draw label
-        draw.rectangle((10, 460, 30, 476), fill=getDisplayColor(RED))
+        draw.rectangle((10, 460, 25, 476), fill=getDisplayColor(RED))
         draw.text((20 + offsetX, 458), getTranslation(wi.lang, "Pressure"), getDisplayColor(BLACK),font=getFont(fonts.normal, fontsize=16))
 
         draw.rectangle((145, 460, 160, 476), fill=getDisplayColor(BLUE))
