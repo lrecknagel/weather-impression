@@ -395,14 +395,14 @@ def drawWeather(wi, cv):
         cv.paste(tempGraphImage, (-35, 300), tempGraphImage)
 
         # draw label
-        draw.rectangle((10, 460, 20, 476), fill=getDisplayColor(RED))
-        draw.text((15 + offsetX, 458), getTranslation(wi.lang, "Pressure"), getDisplayColor(BLACK),font=getFont(fonts.normal, fontsize=16))
+        draw.rectangle((10, 460, 30, 476), fill=getDisplayColor(RED))
+        draw.text((20 + offsetX, 458), getTranslation(wi.lang, "Pressure"), getDisplayColor(BLACK),font=getFont(fonts.normal, fontsize=16))
 
-        draw.rectangle((145, 460, 150, 476), fill=getDisplayColor(BLUE))
-        draw.text((145 + offsetX, 458), getTranslation(wi.lang, "Temp"), getDisplayColor(BLACK),font=getFont(fonts.normal, fontsize=16))
+        draw.rectangle((145, 460, 160, 476), fill=getDisplayColor(BLUE))
+        draw.text((155 + offsetX, 458), getTranslation(wi.lang, "Temp"), getDisplayColor(BLACK),font=getFont(fonts.normal, fontsize=16))
 
-        draw.rectangle((275, 460, 280, 476), fill=getDisplayColor(GREEN))
-        draw.text((275 + offsetX, 458), getTranslation(wi.lang, "Feels like"), getDisplayColor(BLACK),font=getFont(fonts.normal, fontsize=16))
+        draw.rectangle((275, 460, 290, 476), fill=getDisplayColor(GREEN))
+        draw.text((285 + offsetX, 458), getTranslation(wi.lang, "Feels like"), getDisplayColor(BLACK),font=getFont(fonts.normal, fontsize=16))
         return
 
     # Sunrise / Sunset mode
