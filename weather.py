@@ -1,19 +1,15 @@
 #!/usr/bin/env python3
-from os import path, DirEntry
 import os
-import sys
 import math
 import time
 import gpiod
-import calendar
-from datetime import date
 from datetime import datetime
 import re
 from enum import Enum
 
 
-from PIL import Image, ImageDraw, ImageFont, ImageFilter
-from inky.inky_uc8159 import Inky, BLACK, WHITE, GREEN, RED, YELLOW, ORANGE, BLUE, DESATURATED_PALETTE as color_palette
+from PIL import Image, ImageDraw, ImageFont
+from inky.inky_uc8159 import BLACK, WHITE, GREEN, RED, YELLOW, ORANGE, BLUE, DESATURATED_PALETTE as color_palette
 from inky.auto import auto
 
 saturation = 0.5
@@ -245,7 +241,7 @@ def drawWeather(wi, cv):
     width, height = cv.size
 
     # one time message
-    if hasattr( wi, "weatherInfo") == False:
+    if hasattr(wi, "weatherInfo") is False:
         draw.rectangle((0, 0, width, height), fill=getDisplayColor(ORANGE))
         draw.text((20, 70), u"", getDisplayColor(BLACK), anchor="lm", font =getFont(fonts.icon, fontsize=130))
         draw.text((150, 80), "Weather information is not available at this time.", getDisplayColor(BLACK), anchor="lm", font=getFont(fonts.normal, fontsize=18) )
@@ -257,7 +253,7 @@ def drawWeather(wi, cv):
     temp_cur_feels = wi.weatherInfo[u'current'][u'feels_like']
     icon = str(wi.weatherInfo[u'current'][u'weather'][0][u'icon'])
     description = wi.weatherInfo[u'current'][u'weather'][0][u'description']
-    humidity = wi.weatherInfo[u'current'][u'humidity']
+    wi.weatherInfo[u'current'][u'humidity']
     pressure = wi.weatherInfo[u'current'][u'pressure']
     epoch = int(wi.weatherInfo[u'current'][u'dt'])
     #snow = wi.weatherInfo[u'current'][u'snow']
@@ -265,7 +261,7 @@ def drawWeather(wi, cv):
     monthString = time.strftime("%B", time.localtime(epoch))
     dayString = time.strftime("%-d", time.localtime(epoch))
     weekDayString = time.strftime("%a", time.localtime(epoch))
-    weekDayNumber = time.strftime("%w", time.localtime(epoch))
+    time.strftime("%w", time.localtime(epoch))
 
     # date 
     draw.text((15 , 5), getTranslation(wi.lang, monthString) + " " + dayString, getDisplayColor(BLACK), font=getFont(fonts.normal, fontsize=64))
@@ -326,7 +322,7 @@ def drawWeather(wi, cv):
     # Graph mode
     if wi.mode == '2':
         import matplotlib.pyplot as plt
-        from matplotlib import font_manager as fm, rcParams
+        from matplotlib import font_manager as fm
         import numpy as np
         forecastRange = 47
         graph_size = getGraphSize(wi.inky_type)
@@ -365,7 +361,7 @@ def drawWeather(wi, cv):
         #annot_max(np.array(xarray),np.array(tempArray))
         #annot_max(np.array(xarray),np.array(pressureArray))
         plt.axis('off')
-        ax = plt.gca()
+        plt.gca()
         airPressureMin = 990
         airPressureMax = 1020
         if min(pressureArray) < airPressureMin - 2:
@@ -453,8 +449,7 @@ def drawWeather(wi, cv):
     
     if wi.mode == '4':
         import matplotlib.pyplot as plt
-        from matplotlib import font_manager as fm, rcParams
-        import matplotlib
+        from matplotlib import font_manager as fm
         import numpy as np
         # import datetime
 
@@ -577,7 +572,7 @@ def initGPIO():
     return gpiod_pin
 
 def setUpdateStatus(gpiod_pin, busy):
-    if busy == True:
+    if busy is True:
         gpiod_pin.set_value(1)
     else:
         gpiod_pin.set_value(0)
