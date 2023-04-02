@@ -127,6 +127,7 @@ def getTranslation(lang, value):
                 "few clouds": "Wolkig",
                 "scattered clouds": "Bewölkt",
                 "broken clouds": "Leicht Bewölkt",
+                "overcast clouds": "Bedeckt",
                 "shower rain": "Starker Regen",
                 "rain": "Regen",
                 "thunderstorm": "Gewitter",
