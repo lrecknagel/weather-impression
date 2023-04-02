@@ -149,10 +149,11 @@ def getCanvasSize(inky_type):
 
 
 def getWeatherIconOffset(inky_type):
+    # inch-size - 130
     if inky_type == "57":
         return 440
     elif inky_type == "73":
-        return 540
+        return 600
     else:
         raise TypeError("Invalid Inky Type")
     
@@ -232,7 +233,6 @@ class weatherInfomation(object):
 
     def loadWeatherData(self):
         import requests
-
         self.weatherInfo = requests.get(self.forecast_api_uri).json()
 
 
