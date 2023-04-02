@@ -147,6 +147,14 @@ def getCanvasSize(inky_type):
         raise TypeError("Invalid Inky Type")
 
 
+def getWeatherIconOffset(inky_type):
+    if inky_type == "57":
+        return 440
+    elif inky_type == "73":
+        return 540
+    else:
+        raise TypeError("Invalid Inky Type")
+    
 def getGraphSize(inky_type):
     if inky_type == "57":
         return (1.1, 8.4)
@@ -352,7 +360,6 @@ def drawWeather(wi, cv):
     if temperatureTextWidth < 71:
         # when the temp string is a bit short.
         tempOffset = 45
-
     draw.text(
         (5 + offsetX, 35 + offsetY),
         getTranslation(wi.lang, "Temperature"),
@@ -372,18 +379,17 @@ def drawWeather(wi, cv):
         anchor="la",
         font=getFont(fonts.icon, fontsize=80),
     )
-    # humidity
-    # draw.text((width - 8, 270 + offsetY), str(humidity) + "%", getDisplayColor(BLACK), anchor="rs",font =getFont(fonts.light,fontsize=24))
 
     # draw current weather icon
     draw.text(
-        (440 + offsetX, 40 + offsetY),
+        (getWeatherIconOffset(wi.inky_size) + offsetX, 40 + offsetY),
         iconMap[icon],
         getDisplayColor(colorMap[icon]),
         anchor="ma",
         font=getFont(fonts.icon, fontsize=160),
     )
 
+    # weather description below weekday string
     draw.text(
         (width - 8, 35 + offsetY),
         getTranslation(wi.lang, description),
@@ -392,44 +398,6 @@ def drawWeather(wi, cv):
         font=getFont(fonts.light, fontsize=24),
     )
 
-    offsetY = 210
-
-    # When alerts are in effect, show it to forecast area.
-    if wi.mode == "1" and "alerts" in wi.weatherInfo:
-        alertInEffectString = time.strftime(
-            "%B %-d, %H:%m %p", time.localtime(wi.weatherInfo["alerts"][0]["start"])
-        )
-
-        # remove "\n###\n" and \n\n
-        desc = wi.weatherInfo["alerts"][0]["description"].replace("\n###\n", "")
-        desc = desc.replace("\n\n", "")
-        desc = desc.replace("https://", "")  # remove https://
-        desc = re.sub(r"([A-Za-z]*:)", "\n\g<1>", desc)
-        desc = re.sub(r"((?=.{90})(.{0,89}([\.[ ]|[ ]))|.{0,89})", "\g<1>\n", desc)
-        desc = desc.replace("\n\n", "")
-
-        draw.text(
-            (5 + offsetX, 215),
-            wi.weatherInfo["alerts"][0]["event"].capitalize(),
-            getDisplayColor(RED),
-            anchor="la",
-            font=getFont(fonts.light, fontsize=24),
-        )
-        draw.text(
-            (5 + offsetX, 240),
-            alertInEffectString + "/" + wi.weatherInfo["alerts"][0]["sender_name"],
-            getDisplayColor(BLACK),
-            font=getFont(fonts.normal, fontsize=12),
-        )
-
-        draw.text(
-            (5 + offsetX, 270),
-            desc,
-            getDisplayColor(RED),
-            anchor="la",
-            font=getFont(fonts.normal, fontsize=14),
-        )
-        return
     # feels like
     draw.text(
         (5 + offsetX, 175 + 40),
@@ -477,6 +445,49 @@ def drawWeather(wi, cv):
         font=getFont(fonts.normal, fontsize=22),
     )
 
+    offsetY = 210
+
+    # MODE 1 MODE 1 MODE 1 MODE 1 MODE 1 MODE 1 MODE 1 MODE 1 MODE 1 MODE 1 MODE 1
+    # MODE 1 MODE 1 MODE 1 MODE 1 MODE 1 MODE 1 MODE 1 MODE 1 MODE 1 MODE 1 MODE 1
+    # When alerts are in effect, show it to forecast area.
+    if wi.mode == "1" and "alerts" in wi.weatherInfo:
+        alertInEffectString = time.strftime(
+            "%B %-d, %H:%m %p", time.localtime(wi.weatherInfo["alerts"][0]["start"])
+        )
+
+        # remove "\n###\n" and \n\n
+        desc = wi.weatherInfo["alerts"][0]["description"].replace("\n###\n", "")
+        desc = desc.replace("\n\n", "")
+        desc = desc.replace("https://", "")  # remove https://
+        desc = re.sub(r"([A-Za-z]*:)", "\n\g<1>", desc)
+        desc = re.sub(r"((?=.{90})(.{0,89}([\.[ ]|[ ]))|.{0,89})", "\g<1>\n", desc)
+        desc = desc.replace("\n\n", "")
+
+        draw.text(
+            (5 + offsetX, 215),
+            wi.weatherInfo["alerts"][0]["event"].capitalize(),
+            getDisplayColor(RED),
+            anchor="la",
+            font=getFont(fonts.light, fontsize=24),
+        )
+        draw.text(
+            (5 + offsetX, 240),
+            alertInEffectString + "/" + wi.weatherInfo["alerts"][0]["sender_name"],
+            getDisplayColor(BLACK),
+            font=getFont(fonts.normal, fontsize=12),
+        )
+
+        draw.text(
+            (5 + offsetX, 270),
+            desc,
+            getDisplayColor(RED),
+            anchor="la",
+            font=getFont(fonts.normal, fontsize=14),
+        )
+        return
+
+    # MODE 2 MODE 2 MODE 2 MODE 2 MODE 2 MODE 2 MODE 2 MODE 2 MODE 2 MODE 2 MODE 2
+    # MODE 2 MODE 2 MODE 2 MODE 2 MODE 2 MODE 2 MODE 2 MODE 2 MODE 2 MODE 2 MODE 2
     # Graph mode
     if wi.mode == "2":
         import matplotlib.pyplot as plt
@@ -597,6 +608,8 @@ def drawWeather(wi, cv):
         )
         return
 
+    # MODE 3 MODE 3 MODE 3 MODE 3 MODE 3 MODE 3 MODE 3 MODE 3 MODE 3 MODE 3 MODE 3
+    # MODE 3 MODE 3 MODE 3 MODE 3 MODE 3 MODE 3 MODE 3 MODE 3 MODE 3 MODE 3 MODE 3
     # Sunrise / Sunset mode
     if wi.mode == "3":
         sunrise = wi.weatherInfo["current"]["sunrise"]
@@ -685,6 +698,8 @@ def drawWeather(wi, cv):
 
         return
 
+    # MODE 4 MODE 4 MODE 4 MODE 4 MODE 4 MODE 4 MODE 4 MODE 4 MODE 4 MODE 4 MODE 4
+    # MODE 4 MODE 4 MODE 4 MODE 4 MODE 4 MODE 4 MODE 4 MODE 4 MODE 4 MODE 4 MODE 4
     if wi.mode == "4":
         import matplotlib.pyplot as plt
         from matplotlib import font_manager as fm
