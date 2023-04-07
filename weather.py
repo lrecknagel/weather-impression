@@ -121,6 +121,7 @@ def getTranslation(lang, value):
                 "Temperature": "Temperatur",
                 "Feels like": "Gefühlt",
                 "Pressure": "Druck",
+                "Rain": "Regen",
                 "AM": "00:00",
                 "PM": "12:00",
                 "clear sky": "klare Sicht",
@@ -165,6 +166,38 @@ def getGraphSize(inky_type):
     else:
         raise TypeError("Invalid Inky Type")
 
+def getURIByType(endpoint, lat, lon, api_key, unit):
+    if endpoint == "onecall":
+        return (
+            "https://api.openweathermap.org/data/3.0/onecall?&lat="
+            + lat
+            + "&lon="
+            + lon
+            + "&appid="
+            + api_key
+            + "&exclude=daily"
+            + "&units="
+            + unit
+        )
+    elif endpoint == "rain":
+        return (
+            "https://api.openweathermap.org/data/2.5/forecast?lat="
+            + lat
+            + "&lon="
+            + lon
+            + "&appid="
+            + api_key
+            + "&units="
+            + unit
+            + "&cnt=17" # limit to 48h/3h + 1 to adjust with 48h forecast from other api
+        )
+    else:
+        raise TypeError("Invalid URI endpoint")
+
+def getRangeNumber(idx):
+    ## based on 3h forecast for rain
+    return math.floor(idx / 3)
+
 
 # empty structure
 class forecastInfo:
@@ -186,7 +219,7 @@ class weatherInfomation(object):
                 "openweathermap", "FORECAST_INTERVAL", raw=False
             )
             self.api_key = self.config.get("openweathermap", "API_KEY", raw=False)
-            # API document at https://openweathermap.org/api/one-call-api
+            
             self.unit = self.config.get("openweathermap", "TEMP_UNIT", raw=False)
             self.cold_temp = float(
                 self.config.get("openweathermap", "cold_temp", raw=False)
@@ -194,22 +227,20 @@ class weatherInfomation(object):
             self.hot_temp = float(
                 self.config.get("openweathermap", "hot_temp", raw=False)
             )
-            self.forecast_api_uri = (
-                "https://api.openweathermap.org/data/3.0/onecall?&lat="
-                + self.lat
-                + "&lon="
-                + self.lon
-                + "&appid="
-                + self.api_key
-                + "&exclude=daily"
-            )
-            if self.unit == "imperial":
-                self.forecast_api_uri = self.forecast_api_uri + "&units=imperial"
-            else:
-                self.forecast_api_uri = self.forecast_api_uri + "&units=metric"
-            self.loadWeatherData()
+            
             self.lang = self.config.get("openweathermap", "LANG")
             self.inky_size = self.config.get("openweathermap", "INKY_SIZE")
+            self.mode2_rain = self.config.get("openweathermap", "MODE2_RAIN")
+
+            # api uri handling & data-fetching
+            # API documentation at:
+            #   onecall: https://openweathermap.org/api/one-call-api
+            #   forecast: https://openweathermap.org/forecast5
+            self.forecast_api_uri_onecall = getURIByType("onecall", self.lat, self.lon, self.api_key, self.unit)
+            if self.mode2_rain == 'true':
+                self.forecast_api_uri_rain = getURIByType("rain", self.lat, self.lon, self.api_key, self.unit)
+            
+            self.loadWeatherData(True if self.mode2_rain == 'true' else False)
         except:
             self.one_time_message = (
                 "Configuration file is not found or settings are wrong.\nplease check the file : "
@@ -231,9 +262,12 @@ class weatherInfomation(object):
             self.one_time_message = ""
             pass
 
-    def loadWeatherData(self):
+    def loadWeatherData(self, load_rain=False):
         import requests
-        self.weatherInfo = requests.get(self.forecast_api_uri).json()
+
+        self.weatherInfo = requests.get(self.forecast_api_uri_onecall).json()
+        if load_rain is True:
+            self.weatherInfoRain = requests.get(self.forecast_api_uri_rain).json()
 
 
 class fonts(Enum):
@@ -503,6 +537,17 @@ def drawWeather(wi, cv):
         tempArray = []
         feelsArray = []
         pressureArray = []
+        rainArray = []
+
+        # "weather": [
+        #     {
+        #         "id": 500,
+        #         "main": "Rain",
+        #         "description": "light rain",
+        #         "icon": "10n"
+        #     }
+        # ],
+
         try:
             for fi in range(forecastRange):
                 finfo = forecastInfo()
@@ -512,12 +557,18 @@ def drawWeather(wi, cv):
                 finfo.feels_like = wi.weatherInfo["hourly"][fi]["feels_like"]
                 finfo.humidity = wi.weatherInfo["hourly"][fi]["humidity"]
                 finfo.pressure = wi.weatherInfo["hourly"][fi]["pressure"]
+                if wi.mode2_rain == 'true':
+                    finfo.rain = wi.weatherInfoRain["list"][getRangeNumber(fi)].get("rain", { "3h": 0.0 })
+                else:
+                    finfo.rain = { "3h": 0.0 }
                 finfo.icon = wi.weatherInfo["hourly"][fi]["weather"][0]["icon"]
                 # print(wi.weatherInfo[u'hourly'][fi][u'snow'][u'1h']) # mm  / you may get 8 hours maximum
+                
                 xarray.append(finfo.time_dt)
                 tempArray.append(finfo.temp)
                 feelsArray.append(finfo.feels_like)
                 pressureArray.append(finfo.pressure)
+                rainArray.append(finfo.rain)
         except IndexError:
             # The weather forecast API is supposed to return 48 forecasts, but it may return fewer than 48.
             errorMessage = (
@@ -531,7 +582,10 @@ def drawWeather(wi, cv):
                 font=getFont(fonts.normal, fontsize=12),
             )
             pass
-
+          
+        # TODO: graph-rain & check icon mappings
+        # https://openweathermap.org/weather-conditions
+        # graph-pressure
         fig = plt.figure()
         fig.set_figheight(graph_height)
         fig.set_figwidth(graph_width)
@@ -564,7 +618,7 @@ def drawWeather(wi, cv):
             xarray, feelsArray, linewidth=3, color=getGraphColor(GREEN), linestyle=":"
         )  # RGB in 0~1.0
         plt.axis("off")
-        plt.plot(xarray, tempArray, linewidth=3, color=getGraphColor(BLUE))
+        plt.plot(xarray, tempArray, linewidth=3, color=getGraphColor(BLACK))
 
         for idx in range(1, len(xarray)):
             h = time.strftime("%-I", time.localtime(xarray[idx]))
@@ -583,7 +637,21 @@ def drawWeather(wi, cv):
         tempGraphImage = Image.open(tmpfs_path + "temp.png")
         cv.paste(tempGraphImage, (-35, 300), tempGraphImage)
 
-        # draw label
+        # rain
+        if wi.mode2_rain == "true":
+            fig = plt.figure()
+            fig.set_figheight(graph_height)
+            fig.set_figwidth(graph_width)
+            plt.plot(
+                xarray, rainArray, linewidth=3, color=getGraphColor(BLUE)
+            )  # RGB in 0~1.0
+            plt.axis("off")
+            plt.gca()
+            plt.savefig(tmpfs_path + "rain.png", bbox_inches="tight", transparent=True)
+            tempGraphImage = Image.open(tmpfs_path + "rain.png")
+            cv.paste(tempGraphImage, (-35, 330), tempGraphImage)
+
+        # draw labels
         draw.rectangle((10, 460, 25, 476), fill=getDisplayColor(RED))
         draw.text(
             (20 + offsetX, 458),
@@ -592,7 +660,7 @@ def drawWeather(wi, cv):
             font=getFont(fonts.normal, fontsize=16),
         )
 
-        draw.rectangle((145, 460, 160, 476), fill=getDisplayColor(BLUE))
+        draw.rectangle((145, 460, 160, 476), fill=getDisplayColor(BLACK))
         draw.text(
             (155 + offsetX, 458),
             getTranslation(wi.lang, "Temp"),
@@ -600,13 +668,22 @@ def drawWeather(wi, cv):
             font=getFont(fonts.normal, fontsize=16),
         )
 
-        draw.rectangle((275, 460, 290, 476), fill=getDisplayColor(GREEN))
+        draw.rectangle((280, 460, 295, 476), fill=getDisplayColor(GREEN))
         draw.text(
-            (285 + offsetX, 458),
+            (290 + offsetX, 458),
             getTranslation(wi.lang, "Feels like"),
             getDisplayColor(BLACK),
             font=getFont(fonts.normal, fontsize=16),
         )
+        
+        if wi.mode2_rain == "true":
+            draw.rectangle((415, 460, 430, 476), fill=getDisplayColor(BLUE))
+            draw.text(
+                (425 + offsetX, 458),
+                getTranslation(wi.lang, "Rain"),
+                getDisplayColor(BLACK),
+                font=getFont(fonts.normal, fontsize=16),
+            )
         return
 
     # MODE 3 MODE 3 MODE 3 MODE 3 MODE 3 MODE 3 MODE 3 MODE 3 MODE 3 MODE 3 MODE 3
