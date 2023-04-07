@@ -30,3 +30,6 @@ LANG=DE
 
 # Inky size 57, 73
 INKY_SIZE=73
+
+# Rain in mode 2 true | false
+MODE2_RAIN=true
