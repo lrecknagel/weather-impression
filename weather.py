@@ -650,7 +650,7 @@ def drawWeather(wi, cv):
             plt.plot(
                 xarray, rainArray, linewidth=3, color=getGraphColor(BLUE)
             )  # RGB in 0~1.0
-            plt.axis("on")
+            plt.axis("off")
             plt.gca()
             plt.savefig(tmpfs_path + "rain.png", bbox_inches="tight", transparent=True)
             tempGraphImage = Image.open(tmpfs_path + "rain.png")
@@ -1026,19 +1026,19 @@ def update():
     
     cv = Image.new("RGB", getCanvasSize(wi.inky_size), getDisplayColor(WHITE))
     
-    logging.info('Draw on screen START')
+    logging.info('Prepare screen content START')
     drawWeather(wi, cv)
-    logging.info('Draw on screen END')
+    logging.info('Prepare screen content END')
 
-    logging.info('Flash screen START')
+    logging.info('Draw on screen START')
     inky = auto()
     logging.info('Set Image START ...')
     inky.set_image(cv, saturation=saturation)
     logging.info('Set Image END ...')
-    logging.info('Show Inky START ...')
+    logging.info('Show Inky START ...') # long running
     inky.show()
     logging.info('Show Inky END ...')
-    logging.info('Flash screen END')
+    logging.info('Draw on screen END')
 
     setUpdateStatus(gpio_pin, False)
 
