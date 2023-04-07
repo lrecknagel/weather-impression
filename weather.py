@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import os
+import logging
 import math
 import time
 import gpiod
@@ -263,11 +264,13 @@ class weatherInfomation(object):
             pass
 
     def loadWeatherData(self, load_rain=False):
+        logging.info('Requested weather info ...')
         import requests
 
         self.weatherInfo = requests.get(self.forecast_api_uri_onecall).json()
         if load_rain is True:
             self.weatherInfoRain = requests.get(self.forecast_api_uri_rain).json()
+        logging.info('Gathered weather info')
 
 
 class fonts(Enum):
@@ -568,7 +571,7 @@ def drawWeather(wi, cv):
                 tempArray.append(finfo.temp)
                 feelsArray.append(finfo.feels_like)
                 pressureArray.append(finfo.pressure)
-                rainArray.append(finfo.rain)
+                rainArray.append(finfo.rain["3h"])
         except IndexError:
             # The weather forecast API is supposed to return 48 forecasts, but it may return fewer than 48.
             errorMessage = (
@@ -645,11 +648,11 @@ def drawWeather(wi, cv):
             plt.plot(
                 xarray, rainArray, linewidth=3, color=getGraphColor(BLUE)
             )  # RGB in 0~1.0
-            plt.axis("off")
+            plt.axis("on")
             plt.gca()
             plt.savefig(tmpfs_path + "rain.png", bbox_inches="tight", transparent=True)
             tempGraphImage = Image.open(tmpfs_path + "rain.png")
-            cv.paste(tempGraphImage, (-35, 330), tempGraphImage)
+            cv.paste(tempGraphImage, (-35, 300), tempGraphImage)
 
         # draw labels
         draw.rectangle((10, 460, 25, 476), fill=getDisplayColor(RED))
@@ -1014,13 +1017,23 @@ def setUpdateStatus(gpiod_pin, busy):
 def update():
     gpio_pin = initGPIO()
     setUpdateStatus(gpio_pin, True)
+    
+    logging.info('Setting up weather information object ...')
     wi = weatherInfomation()
+    logging.info('Weather information object setup finished')
+    
     cv = Image.new("RGB", getCanvasSize(wi.inky_size), getDisplayColor(WHITE))
+    
+    logging.info('Start draw on screen ...')
     drawWeather(wi, cv)
-    # inky = Inky()
+    logging.info('Finished drawing')
+
+    logging.info('Flash screen ...')
     inky = auto()
     inky.set_image(cv, saturation=saturation)
     inky.show()
+    logging.info('Flash screen done')
+
     setUpdateStatus(gpio_pin, False)
 
 
