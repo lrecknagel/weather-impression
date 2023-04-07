@@ -266,13 +266,13 @@ class weatherInfomation(object):
             pass
 
     def loadWeatherData(self, load_rain=False):
-        logging.info('Requested weather info ...')
+        logging.info('Request weather info START')
         import requests
 
         self.weatherInfo = requests.get(self.forecast_api_uri_onecall).json()
         if load_rain is True:
             self.weatherInfoRain = requests.get(self.forecast_api_uri_rain).json()
-        logging.info('Gathered weather info')
+        logging.info('Request weather info END')
 
 
 class fonts(Enum):
@@ -1020,21 +1020,25 @@ def update():
     gpio_pin = initGPIO()
     setUpdateStatus(gpio_pin, True)
     
-    logging.info('Setting up weather information object ...')
+    logging.info('Weather information object setup START')
     wi = weatherInfomation()
-    logging.info('Weather information object setup finished')
+    logging.info('Weather information object setup END')
     
     cv = Image.new("RGB", getCanvasSize(wi.inky_size), getDisplayColor(WHITE))
     
-    logging.info('Start draw on screen ...')
+    logging.info('Draw on screen START')
     drawWeather(wi, cv)
-    logging.info('Finished drawing')
+    logging.info('Draw on screen END')
 
-    logging.info('Flash screen ...')
+    logging.info('Flash screen START')
     inky = auto()
+    logging.info('Set Image START ...')
     inky.set_image(cv, saturation=saturation)
+    logging.info('Set Image END ...')
+    logging.info('Show Inky START ...')
     inky.show()
-    logging.info('Flash screen done')
+    logging.info('Show Inky END ...')
+    logging.info('Flash screen END')
 
     setUpdateStatus(gpio_pin, False)
 
