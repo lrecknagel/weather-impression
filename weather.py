@@ -22,6 +22,8 @@ from inky.inky_uc8159 import (
 )
 from inky.auto import auto
 
+logging.basicConfig(level=logging.INFO)
+
 saturation = 0.5
 
 tmpfs_path = "/dev/shm/"
@@ -652,7 +654,7 @@ def drawWeather(wi, cv):
             plt.gca()
             plt.savefig(tmpfs_path + "rain.png", bbox_inches="tight", transparent=True)
             tempGraphImage = Image.open(tmpfs_path + "rain.png")
-            cv.paste(tempGraphImage, (-35, 300), tempGraphImage)
+            cv.paste(tempGraphImage, (-70, 300), tempGraphImage)
 
         # draw labels
         draw.rectangle((10, 460, 25, 476), fill=getDisplayColor(RED))
