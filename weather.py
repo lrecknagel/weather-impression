@@ -1,15 +1,17 @@
 #!/usr/bin/env python3
 import os
+import platform
 import logging
 import math
 import time
-import gpiod
 from datetime import datetime
 import re
 from enum import Enum
 
-
+import requests
 from PIL import Image, ImageDraw, ImageFont
+
+import gpiod
 from inky.inky_uc8159 import (
     BLACK,
     WHITE,
@@ -22,14 +24,17 @@ from inky.inky_uc8159 import (
 )
 from inky.auto import auto
 
+DEBUG = bool(os.environ.get('DEBUG'))
 logging.basicConfig(level=logging.INFO)
 
 saturation = 0.5
 
-tmpfs_path = "/dev/shm/"
+tmpfs_path = "/tmp/" if platform.system() == "Darwin" else "/dev/shm/"
 
 # font file path(Adjust or change whatever you want)
-os.chdir("/home/pi/inky/weather-impression")
+if not os.environ.get('WI_DIR'):
+    raise TypeError('Missing WI_DIR ENVIRONMENT variable')
+os.chdir(os.environ.get('WI_DIR'))
 project_root = os.getcwd()
 
 unit_imperial = "imperial"
@@ -234,6 +239,7 @@ class weatherInfomation(object):
             self.lang = self.config.get("openweathermap", "LANG")
             self.inky_size = self.config.get("openweathermap", "INKY_SIZE")
             self.mode2_rain = self.config.get("openweathermap", "MODE2_RAIN")
+            self.mode2_pressure = self.config.get("openweathermap", "MODE2_PRESSURE")
 
             # api uri handling & data-fetching
             # API documentation at:
@@ -242,7 +248,7 @@ class weatherInfomation(object):
             self.forecast_api_uri_onecall = getURIByType("onecall", self.lat, self.lon, self.api_key, self.unit)
             if self.mode2_rain == 'true':
                 self.forecast_api_uri_rain = getURIByType("rain", self.lat, self.lon, self.api_key, self.unit)
-            
+
             self.loadWeatherData(True if self.mode2_rain == 'true' else False)
         except:
             self.one_time_message = (
@@ -267,7 +273,6 @@ class weatherInfomation(object):
 
     def loadWeatherData(self, load_rain=False):
         logging.info('Request weather info START')
-        import requests
 
         self.weatherInfo = requests.get(self.forecast_api_uri_onecall).json()
         if load_rain is True:
@@ -588,32 +593,31 @@ def drawWeather(wi, cv):
             )
             pass
           
-        # TODO: graph-rain & check icon mappings
-        # https://openweathermap.org/weather-conditions
-        # graph-pressure
-        fig = plt.figure()
-        fig.set_figheight(graph_height)
-        fig.set_figwidth(graph_width)
-        plt.plot(
-            xarray, pressureArray, linewidth=3, color=getGraphColor(RED)
-        )  # RGB in 0~1.0
-        # plt.plot(xarray, pressureArray)
-        # annot_max(np.array(xarray),np.array(tempArray))
-        # annot_max(np.array(xarray),np.array(pressureArray))
-        plt.axis("off")
-        plt.gca()
-        airPressureMin = 990
-        airPressureMax = 1020
-        if min(pressureArray) < airPressureMin - 2:
-            airPressureMin = min(pressureArray) + 2
-        if max(pressureArray) > airPressureMax - 2:
-            airPressureMax = max(pressureArray) + 2
+        if wi.mode2_pressure == "true":
+            # graph-pressure
+            fig = plt.figure()
+            fig.set_figheight(graph_height)
+            fig.set_figwidth(graph_width)
+            plt.plot(
+                xarray, pressureArray, linewidth=3, color=getGraphColor(RED)
+            )  # RGB in 0~1.0
+            # plt.plot(xarray, pressureArray)
+            # annot_max(np.array(xarray),np.array(tempArray))
+            # annot_max(np.array(xarray),np.array(pressureArray))
+            plt.axis("off")
+            plt.gca()
+            airPressureMin = 990
+            airPressureMax = 1020
+            if min(pressureArray) < airPressureMin - 2:
+                airPressureMin = min(pressureArray) + 2
+            if max(pressureArray) > airPressureMax - 2:
+                airPressureMax = max(pressureArray) + 2
 
-        plt.ylim(airPressureMin, airPressureMax)
+            plt.ylim(airPressureMin, airPressureMax)
 
-        plt.savefig(tmpfs_path + "pressure.png", bbox_inches="tight", transparent=True)
-        tempGraphImage = Image.open(tmpfs_path + "pressure.png")
-        cv.paste(tempGraphImage, (-35, 330), tempGraphImage)
+            plt.savefig(tmpfs_path + "pressure.png", bbox_inches="tight", transparent=True)
+            tempGraphImage = Image.open(tmpfs_path + "pressure.png")
+            cv.paste(tempGraphImage, (-35, 330), tempGraphImage)
 
         # draw temp and feels like in one figure
         fig = plt.figure()
@@ -623,7 +627,7 @@ def drawWeather(wi, cv):
             xarray, feelsArray, linewidth=3, color=getGraphColor(GREEN), linestyle=":"
         )  # RGB in 0~1.0
         plt.axis("off")
-        plt.plot(xarray, tempArray, linewidth=3, color=getGraphColor(BLACK))
+        plt.plot(xarray, tempArray, linewidth=3, color=getGraphColor(ORANGE))
 
         for idx in range(1, len(xarray)):
             h = time.strftime("%-I", time.localtime(xarray[idx]))
@@ -654,37 +658,43 @@ def drawWeather(wi, cv):
             plt.gca()
             plt.savefig(tmpfs_path + "rain.png", bbox_inches="tight", transparent=True)
             tempGraphImage = Image.open(tmpfs_path + "rain.png")
-            cv.paste(tempGraphImage, (-70, 300), tempGraphImage)
+            cv.paste(tempGraphImage, (-35, 320), tempGraphImage)
 
         # draw labels
-        draw.rectangle((10, 460, 25, 476), fill=getDisplayColor(RED))
-        draw.text(
-            (20 + offsetX, 458),
-            getTranslation(wi.lang, "Pressure"),
-            getDisplayColor(BLACK),
-            font=getFont(fonts.normal, fontsize=16),
-        )
+        presure_offset = 135 if wi.mode2_pressure == "true" else 0
+        # label.pressure
+        if wi.mode2_pressure == "true":
+            draw.rectangle((10, 460, 25, 476), fill=getDisplayColor(RED))
+            draw.text(
+                (20 + offsetX, 458),
+                getTranslation(wi.lang, "Pressure"),
+                getDisplayColor(BLACK),
+                font=getFont(fonts.normal, fontsize=16),
+            )
 
-        draw.rectangle((145, 460, 160, 476), fill=getDisplayColor(BLACK))
+        # label.temp
+        draw.rectangle((10 + presure_offset, 460, 25 + presure_offset, 476), fill=getDisplayColor(ORANGE))
         draw.text(
-            (155 + offsetX, 458),
+            (20 + offsetX + presure_offset, 458),
             getTranslation(wi.lang, "Temp"),
             getDisplayColor(BLACK),
             font=getFont(fonts.normal, fontsize=16),
         )
 
-        draw.rectangle((280, 460, 295, 476), fill=getDisplayColor(GREEN))
+        # label.feels-like
+        draw.rectangle((145 + presure_offset, 460, 160 + presure_offset, 476), fill=getDisplayColor(GREEN))
         draw.text(
-            (290 + offsetX, 458),
+            (155 + offsetX + presure_offset, 458),
             getTranslation(wi.lang, "Feels like"),
             getDisplayColor(BLACK),
             font=getFont(fonts.normal, fontsize=16),
         )
         
+        # label.rain
         if wi.mode2_rain == "true":
-            draw.rectangle((415, 460, 430, 476), fill=getDisplayColor(BLUE))
+            draw.rectangle((280 + presure_offset, 460, 295 + presure_offset, 476), fill=getDisplayColor(BLUE))
             draw.text(
-                (425 + offsetX, 458),
+                (290 + offsetX + presure_offset, 458),
                 getTranslation(wi.lang, "Rain"),
                 getDisplayColor(BLACK),
                 font=getFont(fonts.normal, fontsize=16),
@@ -1017,8 +1027,9 @@ def setUpdateStatus(gpiod_pin, busy):
 
 
 def update():
-    gpio_pin = initGPIO()
-    setUpdateStatus(gpio_pin, True)
+    if not DEBUG:
+        gpio_pin = initGPIO()
+        setUpdateStatus(gpio_pin, True)
     
     logging.info('Weather information object setup START')
     wi = weatherInfomation()
@@ -1030,17 +1041,20 @@ def update():
     drawWeather(wi, cv)
     logging.info('Prepare screen content END')
 
-    logging.info('Draw on screen START')
-    inky = auto()
-    logging.info('Set Image START ...')
-    inky.set_image(cv, saturation=saturation)
-    logging.info('Set Image END ...')
-    logging.info('Show Inky START ...') # long running
-    inky.show()
-    logging.info('Show Inky END ...')
-    logging.info('Draw on screen END')
+    cv.show()
 
-    setUpdateStatus(gpio_pin, False)
+    if not DEBUG:
+        logging.info('Draw on screen START')
+        inky = auto()
+        logging.info('Set Image START ...')
+        inky.set_image(cv, saturation=saturation)
+        logging.info('Set Image END ...')
+        logging.info('Show Inky START ...') # long running
+        inky.show()
+        logging.info('Show Inky END ...')
+        logging.info('Draw on screen END')
+
+        setUpdateStatus(gpio_pin, False)
 
 
 if __name__ == "__main__":

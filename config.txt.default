@@ -33,3 +33,6 @@ INKY_SIZE=73
 
 # Rain in mode 2 true | false
 MODE2_RAIN=true
+
+# Pressure in mode 2 true | false
+MODE2_PRESSURE=false
