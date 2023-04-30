@@ -203,7 +203,8 @@ def getURIByType(endpoint, lat, lon, api_key, unit):
         raise TypeError("Invalid URI endpoint")
 
 def getRangeNumber(idx):
-    ## based on 3h forecast for rain
+    # based on 3h forecast for rain
+    # returns the next idx only every 3rd time
     return math.floor(idx / 3)
 
 

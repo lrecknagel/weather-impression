@@ -1,13 +1,32 @@
 ```bash
-poetry install
+sudo apt install build-essential
+sudo apt-get install python3-distutils
+sudo apt-get install python3-apt
+sudo apt update
+sudo apt upgrade
+
+sudo iwconfig wlan0 power off
+
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+cargo install --git https://github.com/mitsuhiko/rye rye
+```
+
+```bash
+rye sync
 
 # macOS
-python3 -m pip install inky --no-dependencies
+# Hack macos
+cd .venv/lib/python3.11/site-packages
+git clone git@github.com:pimoroni/inky.git
+replace whole inky folder with library/inky
+WI_DIR="~/Documents/personal/code/rasp/inky/weather-impression" DEBUG=true rye run python3 weather.py
+
 # linux
-poetry add inky
+rye add inky
+rye sync
 
 DEBUG=true python3 weather.py
 
 # WI_DIR="/home/pi/inky/weather-impression"
-WI_DIR="/Users/lucasrecknagel/Documents/personal/code/rasp/inky/weather-impression"
+WI_DIR="~/Documents/personal/code/rasp/inky/weather-impression"
 ```
