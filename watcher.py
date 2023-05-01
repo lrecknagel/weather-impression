@@ -7,7 +7,9 @@ import schedule
 import time
 
 # config file should be the same folder.
-os.chdir("/home/pi/inky/weather-impression")
+if not os.environ.get('WI_DIR'):
+    raise TypeError('Missing WI_DIR ENVIRONMENT variable')
+os.chdir(os.environ.get('WI_DIR'))
 project_root = os.getcwd()
 configFilePath = project_root + "/config.txt"
 

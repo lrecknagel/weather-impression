@@ -41,7 +41,9 @@ print(
 
 
 # config file should be the same folder.
-os.chdir("/home/pi/inky/weather-impression")
+if not os.environ.get('WI_DIR'):
+    raise TypeError('Missing WI_DIR ENVIRONMENT variable')
+os.chdir(os.environ.get('WI_DIR'))
 project_root = os.getcwd()
 configFilePath = project_root + "/config.txt"
 
@@ -110,6 +112,11 @@ if save == "y":
     config.set("openweathermap", "TEMP_UNIT", "metric")
     config.set("openweathermap", "cold_temp", "7")
     config.set("openweathermap", "hot_temp", "27")
+    
+    config.set("openweathermap", "lang", "EN")
+    config.set("openweathermap", "inky_size", "73")
+    config.set("openweathermap", "mode2_rain", "true")
+    config.set("openweathermap", "mode2_pressure", "false")
 
     with open(configFilePath, "w") as configfile:
         config.write(configfile)
