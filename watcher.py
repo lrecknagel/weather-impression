@@ -89,7 +89,7 @@ def handle_button(pin):
 for pin in BUTTONS:
     GPIO.add_event_detect(pin, GPIO.FALLING, handle_button, bouncetime=250)
 
-# schedule.every().minute.at(":23").do(refreshScreen)
+# schedule.every(2).minutes.do(refreshScreen)
 schedule.every().hour.at(":01").do(refreshScreen)
 
 while True:
