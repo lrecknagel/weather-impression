@@ -22,7 +22,13 @@ from inky.inky_uc8159 import (
     BLUE,
     DESATURATED_PALETTE as color_palette,
 )
-from inky.auto import auto
+
+# the auto setup does for some reason do not work on some
+# raspberries - so using the explicit imports
+# from inky.auto import auto
+from inky import Inky7Colour as Inky_Impressions_57
+from inky import Inky_Impressions_7 as Inky_Impressions_73
+
 
 DEBUG = bool(os.environ.get('DEBUG'))
 logging.basicConfig(level=logging.INFO)
@@ -1046,7 +1052,8 @@ def update():
 
     if not DEBUG:
         logging.info('Draw on screen START')
-        inky = auto()
+        _Inky = Inky_Impressions_57 if wi.inky_size == "57" else Inky_Impressions_73
+        inky = _Inky()
         logging.info('Set Image START ...')
         inky.set_image(cv, saturation=saturation)
         logging.info('Set Image END ...')
