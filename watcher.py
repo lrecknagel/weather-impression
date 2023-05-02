@@ -9,7 +9,7 @@ import time
 # config file should be the same folder.
 if not os.environ.get('WI_DIR'):
     raise TypeError('Missing WI_DIR ENVIRONMENT variable')
-os.chdir(os.environ.get('WI_DIR'))
+os.chdir(r"{}".format(os.environ.get('WI_DIR')))
 project_root = os.getcwd()
 configFilePath = project_root + "/config.txt"
 

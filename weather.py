@@ -34,7 +34,7 @@ tmpfs_path = "/tmp/" if platform.system() == "Darwin" else "/dev/shm/"
 # font file path(Adjust or change whatever you want)
 if not os.environ.get('WI_DIR'):
     raise TypeError('Missing WI_DIR ENVIRONMENT variable')
-os.chdir(os.environ.get('WI_DIR'))
+os.chdir(r"{}".format(os.environ.get('WI_DIR')))
 project_root = os.getcwd()
 
 unit_imperial = "imperial"
